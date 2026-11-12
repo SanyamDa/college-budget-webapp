@@ -1,5 +1,7 @@
 import type { Expense } from './types'
 import { CATEGORIES, getGroup } from './budget'
+import { makeExpense, makeDeposit } from './budget'
+
 
 const test: Expense = {
   id: '1',
@@ -10,9 +12,7 @@ const test: Expense = {
 }
 
 console.log(test)
-console.log(CATEGORIES.length)
-console.log(getGroup('Veo'))
-console.log(getGroup('Pizza'))
+
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <h1>College Budget App</h1>
