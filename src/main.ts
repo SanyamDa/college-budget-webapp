@@ -1,17 +1,14 @@
-import type { Expense } from './types'
-import { CATEGORIES, getGroup } from './budget'
-import { makeExpense, makeDeposit } from './budget'
+import { makeExpense, totalSpent, totalsByCategory } from './budget'
 
+const expenses = [
+  makeExpense(13, 'Dining Out', 'Taste of India'),
+  makeExpense(4, 'Veo'),
+  makeExpense(4, 'Veo'),
+  makeExpense(10, 'Laundry'),
+]
 
-const test: Expense = {
-  id: '1',
-  amount: 13,
-  category: 'Dining Out',
-  note: 'Taste of India',
-  date: '2026-11-11',
-}
-
-console.log(test)
+console.log(totalSpent(expenses))
+console.log(totalsByCategory(expenses))
 
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `

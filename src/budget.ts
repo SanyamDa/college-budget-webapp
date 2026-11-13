@@ -62,3 +62,19 @@ export function makeDeposit(amount: number, note: string = ''): Deposit {
     date: today(),
   }
 }
+
+export function totalSpent(expenses: Expense[]): number {
+  let total = 0
+  for (const e of expenses) {
+    total += e.amount
+  }
+  return total
+}
+
+export function totalsByCategory(expenses: Expense[]): Record<string, number> {
+  const totals: Record<string, number> = {}
+  for (const e of expenses) {
+    totals[e.category] = (totals[e.category] ?? 0) + e.amount
+  }
+  return totals
+}
