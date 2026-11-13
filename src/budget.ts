@@ -78,3 +78,36 @@ export function totalsByCategory(expenses: Expense[]): Record<string, number> {
   }
   return totals
 }
+
+export function latestDeposit(deposits: Deposit[]): Deposit | undefined {
+  let latest: Deposit | undefined = undefined
+  for (const d of deposits) {
+    if (latest === undefined || d.date > latest.date) {
+      latest = d
+    }
+  }
+  return latest
+}
+
+
+export function expensesSince(expenses: Expense[], date: string): Expense[] {
+  return expenses.filter((e) => e.date >= date)
+}
+
+
+export function sinceLastDeposit(expenses: Expense[], deposits: Deposit[]) {
+  const deposit = latestDeposit(deposits)
+  if (!deposit) {
+    return undefined
+  }
+
+  const recent = expensesSince(expenses, deposit.date)
+  const spent = totalSpent(recent)
+
+  return {
+    deposit,
+    spent,
+    left: deposit.amount - spent,
+    byCategory: totalsByCategory(recent),
+  }
+}
