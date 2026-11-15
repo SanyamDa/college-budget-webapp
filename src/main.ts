@@ -1,3 +1,4 @@
+import './style.css'
 import {
   CATEGORIES,
   currentMonth,
@@ -29,22 +30,27 @@ const depositNoteInput = document.getElementById('deposit-note') as HTMLInputEle
 const depositButton = document.getElementById('log-deposit')!
 const depositErrorEl = document.getElementById('deposit-error')!
 
-// Turn 4 into "$4.00"
+// Turn 4 into "$4.00" and -3 into "-$3.00"
 function money(amount: number): string {
-  return '$' + amount.toFixed(2)
+  const sign = amount < 0 ? '-' : ''
+  return sign + '$' + Math.abs(amount).toFixed(2)
 }
 
 // Redraw the page from the data
 function render(): void {
   if (deposits.length === 0) {
     leftEl.textContent = money(0)
+    leftEl.classList.remove('negative')
     noteEl.textContent = 'Log some money coming in to get started'
     return
   }
 
   const monthExpenses = expensesInMonth(expenses, currentMonth())
 
-  leftEl.textContent = money(getBalance(expenses, deposits))
+  const balance = getBalance(expenses, deposits)
+
+  leftEl.textContent = money(balance)
+  leftEl.classList.toggle('negative', balance < 0)
   noteEl.textContent = `Spent ${money(totalSpent(monthExpenses))} this month`
 }
 
