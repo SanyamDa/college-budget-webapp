@@ -34,7 +34,7 @@ export function today(): string {
 }
 
 export function makeExpense(amount: number, category: string, note: string = ''): Expense {
-  if (amount <= 0) {
+  if (!Number.isFinite(amount) || amount <= 0) {
     throw new Error('Amount must be more than 0')
   }
   if (!getGroup(category)) {
@@ -51,7 +51,7 @@ export function makeExpense(amount: number, category: string, note: string = '')
 }
 
 export function makeDeposit(amount: number, note: string = ''): Deposit {
-  if (amount <= 0) {
+  if (!Number.isFinite(amount) || amount <= 0) {
     throw new Error('Amount must be more than 0')
   }
 
