@@ -1,4 +1,4 @@
-import type { Category, Deposit, Expense, Group } from './types'
+import type { Activity, Category, Deposit, Expense, Group } from './types'
 
 export const CATEGORIES: Category[] = [
   { name: 'Dining Out', group: 'Food' },
@@ -101,4 +101,22 @@ export function currentMonth(): string {
 // Keep only the expenses from one month, like "2026-11"
 export function expensesInMonth(expenses: Expense[], month: string): Expense[] {
   return expenses.filter((e) => e.date.startsWith(month))
+}
+
+// Merge expenses and deposits into one list, newest first
+export function getActivity(expenses: Expense[], deposits: Deposit[]): Activity[] {
+  const list: Activity[] = []
+
+  for (const e of expenses) {
+    list.push({ id: e.id, kind: 'expense', title: e.category, detail: e.note, amount: -e.amount, date: e.date })
+  }
+  for (const d of deposits) {
+    list.push({ id: d.id, kind: 'deposit', title: 'Money in', detail: d.note, amount: d.amount, date: d.date })
+  }
+
+  // Flip first, so on the same day the most recently added ends up on top
+  list.reverse()
+  // Then sort by date, newest first
+  list.sort((a, b) => b.date.localeCompare(a.date))
+  return list
 }

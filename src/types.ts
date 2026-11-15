@@ -19,3 +19,13 @@ export type Deposit = {
   note: string
   date: string
 }
+
+// One row in the activity list. Expenses and deposits both fit this shape
+export type Activity = {
+  id: string
+  kind: 'expense' | 'deposit'
+  title: string
+  detail: string
+  amount: number
+  date: string
+}
