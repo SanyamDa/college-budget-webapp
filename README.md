@@ -6,14 +6,15 @@ A fast budgeting web app built for college students, so you always know where yo
 
 When I get money in college, it's often gone within a week, and I end up scrolling through my bank transactions trying to figure out where it all went. Most budgeting apps are built for adults with steady paychecks and bills like rent and car payments, so they don't match how college students actually spend: lots of small, frequent purchases like dining out with friends, scooter rides, and snacks.
 
-This app makes logging an expense take a few seconds and shows a clear breakdown of where money went since the last time money came in.
+This app makes logging an expense take a few seconds and shows how much money is left plus a clear breakdown of where it went each month.
 
 ## MVP Scope (Version 1.0)
 
 - **Fast expense logging:** enter an amount and tap a category; the date fills in automatically
 - **Log money coming in:** record deposits like "got $300 from parents"
 - **College categories in groups:** Food, Getting Around, School, Personal, Fun, Essentials
-- **"Where did it go" breakdown:** spending by category since the last deposit
+- **Money left:** everything that came in minus everything spent
+- **"Where did it go" breakdown:** spending by category for the month
 - **Transactions page:** view, edit, and delete expenses
 - **Saved in the browser:** data persists with localStorage
 

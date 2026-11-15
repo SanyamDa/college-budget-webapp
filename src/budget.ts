@@ -79,35 +79,26 @@ export function totalsByCategory(expenses: Expense[]): Record<string, number> {
   return totals
 }
 
-export function latestDeposit(deposits: Deposit[]): Deposit | undefined {
-  let latest: Deposit | undefined = undefined
+// Add up every deposit in the list
+export function totalDeposited(deposits: Deposit[]): number {
+  let total = 0
   for (const d of deposits) {
-    if (latest === undefined || d.date > latest.date) {
-      latest = d
-    }
+    total += d.amount
   }
-  return latest
+  return total
 }
 
-
-export function expensesSince(expenses: Expense[], date: string): Expense[] {
-  return expenses.filter((e) => e.date >= date)
+// Money left = everything that came in minus everything that went out
+export function getBalance(expenses: Expense[], deposits: Deposit[]): number {
+  return totalDeposited(deposits) - totalSpent(expenses)
 }
 
+// This month as "YYYY-MM", like "2026-11"
+export function currentMonth(): string {
+  return today().slice(0, 7)
+}
 
-export function sinceLastDeposit(expenses: Expense[], deposits: Deposit[]) {
-  const deposit = latestDeposit(deposits)
-  if (!deposit) {
-    return undefined
-  }
-
-  const recent = expensesSince(expenses, deposit.date)
-  const spent = totalSpent(recent)
-
-  return {
-    deposit,
-    spent,
-    left: deposit.amount - spent,
-    byCategory: totalsByCategory(recent),
-  }
+// Keep only the expenses from one month, like "2026-11"
+export function expensesInMonth(expenses: Expense[], month: string): Expense[] {
+  return expenses.filter((e) => e.date.startsWith(month))
 }

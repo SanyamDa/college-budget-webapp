@@ -1,4 +1,12 @@
-import { CATEGORIES, makeDeposit, makeExpense, sinceLastDeposit } from './budget'
+import {
+  CATEGORIES,
+  currentMonth,
+  expensesInMonth,
+  getBalance,
+  makeDeposit,
+  makeExpense,
+  totalSpent,
+} from './budget'
 import { loadDeposits, loadExpenses, saveDeposits, saveExpenses } from './storage'
 
 // The app's data, loaded once when the page opens
@@ -28,16 +36,16 @@ function money(amount: number): string {
 
 // Redraw the page from the data
 function render(): void {
-  const summary = sinceLastDeposit(expenses, deposits)
-
-  if (!summary) {
+  if (deposits.length === 0) {
     leftEl.textContent = money(0)
     noteEl.textContent = 'Log some money coming in to get started'
     return
   }
 
-  leftEl.textContent = money(summary.left)
-  noteEl.textContent = `Spent ${money(summary.spent)} of ${money(summary.deposit.amount)} since ${summary.deposit.date}`
+  const monthExpenses = expensesInMonth(expenses, currentMonth())
+
+  leftEl.textContent = money(getBalance(expenses, deposits))
+  noteEl.textContent = `Spent ${money(totalSpent(monthExpenses))} this month`
 }
 
 // Runs when you tap a category button
