@@ -9,6 +9,7 @@ import {
   makeDeposit,
   makeExpense,
   totalSpent,
+  totalsByGroup,
 } from './budget'
 import { loadDeposits, loadExpenses, saveDeposits, saveExpenses } from './storage'
 import type { Activity } from './types'
@@ -20,6 +21,12 @@ const deposits = loadDeposits()
 // Summary card
 const leftEl = document.getElementById('left')!
 const noteEl = document.getElementById('summary-note')!
+
+// Where did it go
+const breakdownTitleEl = document.getElementById('breakdown-title')!
+const breakdownTotalEl = document.getElementById('breakdown-total')!
+const breakdownEl = document.getElementById('breakdown')!
+const breakdownEmptyEl = document.getElementById('breakdown-empty')!
 
 // Expense form
 const amountInput = document.getElementById('amount') as HTMLInputElement
@@ -64,6 +71,12 @@ function prettyDate(date: string): string {
   return new Date(year, month - 1, day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
+// Turn "2026-11" into "November"
+function monthName(month: string): string {
+  const [year, monthNumber] = month.split('-').map(Number)
+  return new Date(year, monthNumber - 1, 1).toLocaleDateString('en-US', { month: 'long' })
+}
+
 // Make an element with a class and some text
 function makeEl(tag: string, className: string, text: string): HTMLElement {
   const el = document.createElement(tag)
@@ -75,6 +88,7 @@ function makeEl(tag: string, className: string, text: string): HTMLElement {
 // Redraw the whole page from the data
 function render(): void {
   renderSummary()
+  renderBreakdown()
   renderActivity()
 }
 
@@ -94,6 +108,44 @@ function renderSummary(): void {
   leftEl.textContent = money(balance)
   leftEl.classList.toggle('negative', balance < 0)
   noteEl.textContent = `Spent ${money(totalSpent(monthExpenses))} this month`
+}
+
+// The "Where did it go" card: this month's spending by group
+function renderBreakdown(): void {
+  const month = currentMonth()
+  const monthExpenses = expensesInMonth(expenses, month)
+  const spent = totalSpent(monthExpenses)
+  const groups = totalsByGroup(monthExpenses)
+
+  breakdownTitleEl.textContent = `Where did it go · ${monthName(month)}`
+  breakdownTotalEl.textContent = money(spent)
+
+  // Wipe the old rows, then build them again from the data
+  breakdownEl.replaceChildren()
+  breakdownEmptyEl.hidden = groups.length > 0
+
+  for (const g of groups) {
+    const percent = Math.round((g.total / spent) * 100)
+
+    const header = makeEl('div', 'breakdown-header', '')
+    header.append(
+      makeEl('span', 'breakdown-group', g.group),
+      makeEl('span', 'breakdown-amount', `${money(g.total)} · ${percent}%`),
+    )
+
+    // The bar: a gray track with a colored part as wide as the percent
+    const fill = makeEl('div', 'bar-fill', '')
+    fill.style.width = `${percent}%`
+    const bar = makeEl('div', 'bar', '')
+    bar.append(fill)
+
+    // "Dining Out $13.00 · Snacks & Coffee $6.50"
+    const categoryText = g.categories.map((c) => `${c.name} ${money(c.total)}`).join(' · ')
+
+    const row = document.createElement('li')
+    row.append(header, bar, makeEl('p', 'breakdown-categories', categoryText))
+    breakdownEl.appendChild(row)
+  }
 }
 
 // The "Recent activity" list

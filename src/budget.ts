@@ -1,4 +1,4 @@
-import type { Activity, Category, Deposit, Expense, Group } from './types'
+import type { Activity, Category, Deposit, Expense, Group, GroupTotal } from './types'
 
 export const CATEGORIES: Category[] = [
   { name: 'Dining Out', group: 'Food' },
@@ -122,4 +122,31 @@ export function getActivity(expenses: Expense[], deposits: Deposit[]): Activity[
   // Then sort by date, newest first
   list.sort((a, b) => b.date.localeCompare(a.date))
   return list
+}
+
+// Spending grouped by group (Food, Fun...), biggest group first
+export function totalsByGroup(expenses: Expense[]): GroupTotal[] {
+  const groups: GroupTotal[] = []
+
+  // Start from the per-category totals we already know how to make
+  for (const [name, total] of Object.entries(totalsByCategory(expenses))) {
+    const groupName = getGroup(name) ?? 'Other'
+
+    // Find this group's entry, or create it the first time we see the group
+    let entry = groups.find((g) => g.group === groupName)
+    if (!entry) {
+      entry = { group: groupName, total: 0, categories: [] }
+      groups.push(entry)
+    }
+
+    entry.total += total
+    entry.categories.push({ name, total })
+  }
+
+  // Biggest first, for the groups and for the categories inside each group
+  groups.sort((a, b) => b.total - a.total)
+  for (const g of groups) {
+    g.categories.sort((a, b) => b.total - a.total)
+  }
+  return groups
 }
