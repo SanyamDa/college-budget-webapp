@@ -33,10 +33,15 @@ export function today(): string {
   return `${year}-${month}-${day}`
 }
 
-export function makeExpense(amount: number, category: string, note: string = ''): Expense {
+// Throw an error unless the amount is a real number above 0
+export function checkAmount(amount: number): void {
   if (!Number.isFinite(amount) || amount <= 0) {
     throw new Error('Amount must be more than 0')
   }
+}
+
+export function makeExpense(amount: number, category: string, note: string = ''): Expense {
+  checkAmount(amount)
   if (!getGroup(category)) {
     throw new Error(`Unknown category: ${category}`)
   }
@@ -51,9 +56,7 @@ export function makeExpense(amount: number, category: string, note: string = '')
 }
 
 export function makeDeposit(amount: number, note: string = ''): Deposit {
-  if (!Number.isFinite(amount) || amount <= 0) {
-    throw new Error('Amount must be more than 0')
-  }
+  checkAmount(amount)
 
   return {
     id: crypto.randomUUID(),

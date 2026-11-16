@@ -1,6 +1,7 @@
 import './style.css'
 import {
   CATEGORIES,
+  checkAmount,
   currentMonth,
   expensesInMonth,
   getActivity,
@@ -35,6 +36,21 @@ const depositErrorEl = document.getElementById('deposit-error')!
 // Activity list
 const activityEl = document.getElementById('activity')!
 const activityEmptyEl = document.getElementById('activity-empty')!
+
+// Edit popup
+const editDialog = document.getElementById('edit-dialog') as HTMLDialogElement
+const editForm = document.getElementById('edit-form') as HTMLFormElement
+const editTitleEl = document.getElementById('edit-title')!
+const editAmountInput = document.getElementById('edit-amount') as HTMLInputElement
+const editCategoryLabel = document.getElementById('edit-category-label')!
+const editCategorySelect = document.getElementById('edit-category') as HTMLSelectElement
+const editNoteInput = document.getElementById('edit-note') as HTMLInputElement
+const editDateInput = document.getElementById('edit-date') as HTMLInputElement
+const editErrorEl = document.getElementById('edit-error')!
+const editCancelButton = document.getElementById('edit-cancel')!
+
+// The row being edited right now, or null when the popup is closed
+let editing: Activity | null = null
 
 // Turn 4 into "$4.00" and -3 into "-$3.00"
 function money(amount: number): string {
@@ -90,8 +106,9 @@ function renderActivity(): void {
 
   for (const item of activity) {
     const detail = item.detail ? `${prettyDate(item.date)} · ${item.detail}` : prettyDate(item.date)
-    const text = makeEl('div', 'activity-text', '')
-    text.append(makeEl('p', 'activity-title', item.title), makeEl('p', 'activity-detail', detail))
+    const text = makeEl('button', 'activity-text', '')
+    text.append(makeEl('span', 'activity-title', item.title), makeEl('span', 'activity-detail', detail))
+    text.addEventListener('click', () => openEdit(item))
 
     const sign = item.amount > 0 ? '+' : ''
     const amount = makeEl('p', 'activity-amount', sign + money(item.amount))
@@ -165,6 +182,81 @@ function deleteActivity(item: Activity): void {
 
   render()
 }
+
+// Runs when you tap a row: fill the popup with that row's data and open it
+function openEdit(item: Activity): void {
+  editing = item
+  editTitleEl.textContent = item.kind === 'expense' ? 'Edit expense' : 'Edit money in'
+  editAmountInput.value = String(Math.abs(item.amount))
+  editNoteInput.value = item.detail
+  editDateInput.value = item.date
+  editErrorEl.textContent = ''
+
+  // Deposits don't have a category, so hide that box for them
+  editCategoryLabel.hidden = item.kind !== 'expense'
+  if (item.kind === 'expense') {
+    editCategorySelect.value = item.title // for expenses, the title is the category
+  }
+
+  editDialog.showModal()
+}
+
+// Runs when you tap Save in the popup
+function saveEdit(event: SubmitEvent): void {
+  event.preventDefault() // stop the browser from reloading the page
+
+  const item = editing
+  if (!item) {
+    return
+  }
+
+  try {
+    const amount = Number(editAmountInput.value)
+    checkAmount(amount)
+    if (editDateInput.value === '') {
+      throw new Error('Pick a date')
+    }
+
+    if (item.kind === 'expense') {
+      const expense = expenses.find((e) => e.id === item.id)
+      if (expense) {
+        expense.amount = amount
+        expense.category = editCategorySelect.value
+        expense.note = editNoteInput.value
+        expense.date = editDateInput.value
+        saveExpenses(expenses)
+      }
+    } else {
+      const deposit = deposits.find((d) => d.id === item.id)
+      if (deposit) {
+        deposit.amount = amount
+        deposit.note = editNoteInput.value
+        deposit.date = editDateInput.value
+        saveDeposits(deposits)
+      }
+    }
+
+    editDialog.close()
+    render()
+  } catch (err) {
+    editErrorEl.textContent = (err as Error).message
+  }
+}
+
+// Fill the popup's category dropdown, one option per category
+for (const category of CATEGORIES) {
+  const option = document.createElement('option')
+  option.value = category.name
+  option.textContent = category.name
+  editCategorySelect.appendChild(option)
+}
+
+// Hook up the popup's buttons
+editForm.addEventListener('submit', saveEdit)
+editCancelButton.addEventListener('click', () => editDialog.close())
+editDialog.addEventListener('close', () => {
+  editing = null
+})
 
 // Make one button per category
 for (const category of CATEGORIES) {
