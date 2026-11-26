@@ -160,6 +160,31 @@ button:active {
 }
 
 /* ===== This month ===== */
+.month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.month-nav h2 {
+  margin: 0;
+}
+
+.month-arrow {
+  min-width: 44px;
+  padding: 0;
+  font-size: 1.6rem;
+  line-height: 1;
+  background: transparent;
+  border: none;
+}
+
+.month-arrow:disabled {
+  opacity: 0.25;
+  cursor: default;
+  transform: none;
+}
 .stats {
   display: grid;
   grid-template-columns: 1fr 1fr;

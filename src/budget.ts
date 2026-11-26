@@ -172,3 +172,24 @@ export function dailyTotals(expenses: Expense[], month: string): number[] {
   }
   return totals
 }
+
+// Move a month like "2026-11" forward or back. shiftMonth("2026-12", 1) is "2027-01"
+export function shiftMonth(month: string, by: number): string {
+  const [year, monthNumber] = month.split('-').map(Number)
+
+  // Date fixes overflow for us: month 12 (0-based) rolls over into January of next year
+  const d = new Date(year, monthNumber - 1 + by, 1)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+}
+
+// The oldest month that has an expense in it, or this month if there are none
+export function earliestMonth(expenses: Expense[]): string {
+  let earliest = currentMonth()
+  for (const e of expenses) {
+    const month = e.date.slice(0, 7)
+    if (month < earliest) {
+      earliest = month
+    }
+  }
+  return earliest
+}

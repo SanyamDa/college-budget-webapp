@@ -5,11 +5,13 @@ import {
   checkAmount,
   currentMonth,
   dailyTotals,
+  earliestMonth,
   expensesInMonth,
   getActivity,
   getBalance,
   makeDeposit,
   makeExpense,
+  shiftMonth,
   totalSpent,
   totalsByGroup,
 } from './budget'
@@ -27,6 +29,8 @@ const noteEl = document.getElementById('summary-note')!
 
 // This month card
 const monthTitleEl = document.getElementById('month-title')!
+const prevMonthButton = document.getElementById('prev-month') as HTMLButtonElement
+const nextMonthButton = document.getElementById('next-month') as HTMLButtonElement
 const statSpentEl = document.getElementById('stat-spent')!
 const statLoggedEl = document.getElementById('stat-logged')!
 const dailyChartCanvas = document.getElementById('daily-chart') as HTMLCanvasElement
@@ -68,6 +72,9 @@ const editCancelButton = document.getElementById('edit-cancel')!
 // The row being edited right now, or null when the popup is closed
 let editing: Activity | null = null
 
+// The month the charts and breakdown are showing, like "2026-11". Starts on this month
+let viewMonth = currentMonth()
+
 // Turn 4 into "$4.00" and -3 into "-$3.00"
 function money(amount: number): string {
   const sign = amount < 0 ? '-' : ''
@@ -80,10 +87,10 @@ function prettyDate(date: string): string {
   return new Date(year, month - 1, day).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
 }
 
-// Turn "2026-11" into "November"
+// Turn "2026-11" into "November 2026"
 function monthName(month: string): string {
   const [year, monthNumber] = month.split('-').map(Number)
-  return new Date(year, monthNumber - 1, 1).toLocaleDateString('en-US', { month: 'long' })
+  return new Date(year, monthNumber - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
 }
 
 // Make an element with a class and some text
@@ -120,26 +127,30 @@ function renderSummary(): void {
   noteEl.textContent = `Spent ${money(totalSpent(monthExpenses))} this month`
 }
 
-// The "This month" card: 2 stats and the daily chart
+// The month card: arrows, 2 stats and the daily chart
 function renderMonth(): void {
-  const month = currentMonth()
-  const monthExpenses = expensesInMonth(expenses, month)
+  const monthExpenses = expensesInMonth(expenses, viewMonth)
 
-  monthTitleEl.textContent = monthName(month)
+  monthTitleEl.textContent = monthName(viewMonth)
   statSpentEl.textContent = money(totalSpent(monthExpenses))
   statLoggedEl.textContent = String(monthExpenses.length)
-  drawDailyChart(dailyChartCanvas, dailyTotals(expenses, month))
+  drawDailyChart(dailyChartCanvas, dailyTotals(expenses, viewMonth))
+
+  // Can't go back past the first month with data, or forward past this month
+  prevMonthButton.disabled = viewMonth <= earliestMonth(expenses)
+  nextMonthButton.disabled = viewMonth >= currentMonth()
 }
 
-// The "Where did it go" card: this month's spending by group, then the top 5
+// The "Where did it go" card: the month's spending by group, then the top 5
 function renderBreakdown(): void {
-  const monthExpenses = expensesInMonth(expenses, currentMonth())
+  const monthExpenses = expensesInMonth(expenses, viewMonth)
   const spent = totalSpent(monthExpenses)
   const groups = totalsByGroup(monthExpenses)
 
   // Wipe the old rows, then build them again from the data
   breakdownEl.replaceChildren()
   breakdownEmptyEl.hidden = groups.length > 0
+  breakdownEmptyEl.textContent = `No spending in ${monthName(viewMonth)}`
 
   for (const g of groups) {
     const percent = Math.round((g.total / spent) * 100)
@@ -223,6 +234,9 @@ function logExpense(categoryName: string): void {
     amountInput.value = ''
     noteInput.value = ''
     errorEl.textContent = ''
+
+    // Jump back to this month, so you can see the new expense count
+    viewMonth = currentMonth()
     render()
   } catch (err) {
     errorEl.textContent = (err as Error).message
@@ -355,6 +369,16 @@ for (const category of CATEGORIES) {
 
 // Hook up the deposit button
 depositButton.addEventListener('click', logDeposit)
+
+// Hook up the month arrows
+prevMonthButton.addEventListener('click', () => {
+  viewMonth = shiftMonth(viewMonth, -1)
+  render()
+})
+nextMonthButton.addEventListener('click', () => {
+  viewMonth = shiftMonth(viewMonth, 1)
+  render()
+})
 
 // Redraw when the phone switches between light and dark mode, so the chart colors match
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', render)
