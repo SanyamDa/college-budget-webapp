@@ -62,6 +62,13 @@ h2 {
   margin: 0 0 12px;
 }
 
+h3 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 16px 0 8px;
+  color: var(--muted);
+}
+
 /* ===== Cards ===== */
 .card {
   background: var(--card);
@@ -152,25 +159,39 @@ button:active {
   display: none;
 }
 
-/* ===== Where did it go ===== */
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 12px;
-  margin-bottom: 12px;
+/* ===== This month ===== */
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }
 
-.card-header h2 {
-  margin: 0;
+.stat {
+  padding: 10px 12px;
+  background: var(--bg);
+  border-radius: 10px;
 }
 
-.breakdown-total {
+.stat-value {
   margin: 0;
+  font-size: 1.4rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 
+.stat-label {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+/* Chart.js fills whatever box it's in, so the box sets the size */
+.chart-box {
+  position: relative;
+  height: 180px;
+}
+
+/* ===== Where did it go ===== */
 .breakdown {
   list-style: none;
   margin: 0;
@@ -218,6 +239,54 @@ button:active {
   margin: 0;
   color: var(--muted);
   font-size: 0.8rem;
+}
+
+/* ===== Top 5 expenses ===== */
+.top-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.top-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--border);
+}
+
+.top-list li:first-child {
+  border-top: none;
+  padding-top: 0;
+}
+
+.top-text {
+  min-width: 0;
+}
+
+.top-title,
+.top-detail {
+  display: block;
+}
+
+.top-title {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.top-detail {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.top-amount {
+  font-weight: 600;
+  color: var(--danger);
+  font-variant-numeric: tabular-nums;
 }
 
 /* ===== Recent activity ===== */

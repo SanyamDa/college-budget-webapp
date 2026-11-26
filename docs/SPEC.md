@@ -20,7 +20,8 @@ Features:
 - Edit anything I logged (amount, category, note, date)
 - Delete anything I logged (asks first)
 - Data stays saved after closing the tab (localStorage)
-- Pie chart of spending by group (Chart.js)
+- This month: total spent, how many expenses I logged, and a bar chart of spending per day (Chart.js)
+- Top 5 biggest expenses this month
 
 Other stuff it should be
 
@@ -50,4 +51,6 @@ Changes I made along the way:
 disappear, so I switched it to a normal balance (money in minus money out) and moved the
 breakdown to monthly.
 - Everything is on one page instead of separate pages. It's simpler and works better on a phone.
+- I planned a pie chart of spending by category, but the "where did it go" bars already show that.
+A daily bar chart shows something new (which days I spend the most), so I went with that instead.
 - Dates don't have times, so if two things are logged the same day, the one I added last shows first.

@@ -25,15 +25,6 @@
       </section>
 
       <section class="card">
-        <div class="card-header">
-          <h2 id="breakdown-title">Where did it go</h2>
-          <p id="breakdown-total" class="breakdown-total"></p>
-        </div>
-        <ul id="breakdown" class="breakdown"></ul>
-        <p id="breakdown-empty" class="note">No spending yet this month</p>
-      </section>
-
-      <section class="card">
         <h2>Log an expense</h2>
         <input id="amount" type="number" inputmode="decimal" placeholder="0.00" />
         <input id="note" type="text" placeholder="Note (optional)" />
@@ -47,6 +38,34 @@
         <input id="deposit-note" type="text" placeholder="Where from? (optional)" />
         <button id="log-deposit" class="primary">Add money</button>
         <p id="deposit-error" class="error"></p>
+      </section>
+
+      <section class="card">
+        <h2 id="month-title">This month</h2>
+        <div class="stats">
+          <div class="stat">
+            <p id="stat-spent" class="stat-value">$0.00</p>
+            <p class="stat-label">Spent</p>
+          </div>
+          <div class="stat">
+            <p id="stat-logged" class="stat-value">0</p>
+            <p class="stat-label">Expenses logged</p>
+          </div>
+        </div>
+        <h3>Spending by day</h3>
+        <div class="chart-box">
+          <canvas id="daily-chart"></canvas>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Where did it go</h2>
+        <ul id="breakdown" class="breakdown"></ul>
+        <p id="breakdown-empty" class="note">No spending yet this month</p>
+        <div id="top-section">
+          <h3>Top 5 expenses</h3>
+          <ol id="top-expenses" class="top-list"></ol>
+        </div>
       </section>
 
       <section class="card">

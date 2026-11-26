@@ -150,3 +150,25 @@ export function totalsByGroup(expenses: Expense[]): GroupTotal[] {
   }
   return groups
 }
+
+// The biggest expenses in a list, biggest first
+export function biggestExpenses(expenses: Expense[], count: number): Expense[] {
+  // Copy the list first, because sort() changes the list it's called on
+  return [...expenses].sort((a, b) => b.amount - a.amount).slice(0, count)
+}
+
+// How much was spent on each day of a month, like "2026-11"
+// The result has one number per day: totals[0] is day 1, totals[1] is day 2...
+export function dailyTotals(expenses: Expense[], month: string): number[] {
+  const [year, monthNumber] = month.split('-').map(Number)
+
+  // Day 0 of the NEXT month is the last day of THIS month (28, 30 or 31)
+  const daysInMonth = new Date(year, monthNumber, 0).getDate()
+
+  const totals: number[] = new Array(daysInMonth).fill(0)
+  for (const e of expensesInMonth(expenses, month)) {
+    const day = Number(e.date.slice(8, 10))
+    totals[day - 1] += e.amount
+  }
+  return totals
+}

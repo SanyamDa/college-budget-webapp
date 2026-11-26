@@ -1,8 +1,10 @@
 import './style.css'
 import {
+  biggestExpenses,
   CATEGORIES,
   checkAmount,
   currentMonth,
+  dailyTotals,
   expensesInMonth,
   getActivity,
   getBalance,
@@ -11,6 +13,7 @@ import {
   totalSpent,
   totalsByGroup,
 } from './budget'
+import { drawDailyChart } from './charts'
 import { loadDeposits, loadExpenses, saveDeposits, saveExpenses } from './storage'
 import type { Activity } from './types'
 
@@ -22,11 +25,17 @@ const deposits = loadDeposits()
 const leftEl = document.getElementById('left')!
 const noteEl = document.getElementById('summary-note')!
 
+// This month card
+const monthTitleEl = document.getElementById('month-title')!
+const statSpentEl = document.getElementById('stat-spent')!
+const statLoggedEl = document.getElementById('stat-logged')!
+const dailyChartCanvas = document.getElementById('daily-chart') as HTMLCanvasElement
+
 // Where did it go
-const breakdownTitleEl = document.getElementById('breakdown-title')!
-const breakdownTotalEl = document.getElementById('breakdown-total')!
 const breakdownEl = document.getElementById('breakdown')!
 const breakdownEmptyEl = document.getElementById('breakdown-empty')!
+const topSectionEl = document.getElementById('top-section')!
+const topListEl = document.getElementById('top-expenses')!
 
 // Expense form
 const amountInput = document.getElementById('amount') as HTMLInputElement
@@ -88,6 +97,7 @@ function makeEl(tag: string, className: string, text: string): HTMLElement {
 // Redraw the whole page from the data
 function render(): void {
   renderSummary()
+  renderMonth()
   renderBreakdown()
   renderActivity()
 }
@@ -110,15 +120,22 @@ function renderSummary(): void {
   noteEl.textContent = `Spent ${money(totalSpent(monthExpenses))} this month`
 }
 
-// The "Where did it go" card: this month's spending by group
-function renderBreakdown(): void {
+// The "This month" card: 2 stats and the daily chart
+function renderMonth(): void {
   const month = currentMonth()
   const monthExpenses = expensesInMonth(expenses, month)
+
+  monthTitleEl.textContent = monthName(month)
+  statSpentEl.textContent = money(totalSpent(monthExpenses))
+  statLoggedEl.textContent = String(monthExpenses.length)
+  drawDailyChart(dailyChartCanvas, dailyTotals(expenses, month))
+}
+
+// The "Where did it go" card: this month's spending by group, then the top 5
+function renderBreakdown(): void {
+  const monthExpenses = expensesInMonth(expenses, currentMonth())
   const spent = totalSpent(monthExpenses)
   const groups = totalsByGroup(monthExpenses)
-
-  breakdownTitleEl.textContent = `Where did it go · ${monthName(month)}`
-  breakdownTotalEl.textContent = money(spent)
 
   // Wipe the old rows, then build them again from the data
   breakdownEl.replaceChildren()
@@ -145,6 +162,24 @@ function renderBreakdown(): void {
     const row = document.createElement('li')
     row.append(header, bar, makeEl('p', 'breakdown-categories', categoryText))
     breakdownEl.appendChild(row)
+  }
+
+  // Top 5 biggest expenses this month
+  const top = biggestExpenses(monthExpenses, 5)
+  topSectionEl.hidden = top.length === 0
+  topListEl.replaceChildren()
+
+  for (const e of top) {
+    // Show the note as the title if there is one, otherwise the category
+    const title = e.note || e.category
+    const detail = e.note ? `${e.category} · ${prettyDate(e.date)}` : prettyDate(e.date)
+
+    const text = makeEl('div', 'top-text', '')
+    text.append(makeEl('span', 'top-title', title), makeEl('span', 'top-detail', detail))
+
+    const row = document.createElement('li')
+    row.append(text, makeEl('span', 'top-amount', money(e.amount)))
+    topListEl.appendChild(row)
   }
 }
 
@@ -320,5 +355,8 @@ for (const category of CATEGORIES) {
 
 // Hook up the deposit button
 depositButton.addEventListener('click', logDeposit)
+
+// Redraw when the phone switches between light and dark mode, so the chart colors match
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', render)
 
 render()
