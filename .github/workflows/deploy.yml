@@ -25,6 +25,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # If any test fails, stop here so a broken app never goes live
+      - run: npm test
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:

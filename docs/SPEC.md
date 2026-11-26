@@ -38,7 +38,7 @@ Class requirements
 - Repo with README, Eisenhower matrix and system diagram
 - README is accurate (tech stack still lists libraries I ended up not using)
 - One commit per step of the build plan
-- Tests for the logic in `budget.ts`
+- Tests for the logic in `budget.ts` (29 tests, run with `npm test`, and they run before every deploy)
 
 Not doing in v1:
 
